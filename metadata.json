@@ -1,0 +1,8 @@
+{
+  "uuid": "wide-right-top-bar-panell@chahalarsh.github.io",
+  "name": "Wide right top bar Panel",
+  "description": "Lets the right side of the top bar grow beyond half the screen so crowded indicators and tray icons are no longer squished.",
+  "shell-version": ["48", "49","50"],
+  "url": "https://github.com/chahalarsh/wide-right-top-bar-panel",
+  "version-name": "1.0.0"
+}
