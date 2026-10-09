@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-// Wide Right Panel - lets the right side of the GNOME Shell top bar grow
-// past half the screen width so crowded indicators are not squished.
 
 import Clutter from 'gi://Clutter';
 import GObject from 'gi://GObject';
@@ -8,17 +6,15 @@ import GObject from 'gi://GObject';
 import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
-// Runs after the panel allocates the right box and widens it to its
-// natural width (growing toward the center) if the panel gave it less.
-const GrowRightConstraint = GObject.registerClass(
-class GrowRightConstraint extends Clutter.Constraint {
+// The panel never gives the right box more than the space left beside the
+// centered clock. After the panel allocates the box, widen it toward the
+// center up to its natural width.
+const GrowRightConstraint = GObject.registerClass({
+    GTypeName: 'WideRightTopBarPanelGrowRightConstraint',
+}, class GrowRightConstraint extends Clutter.Constraint {
     vfunc_update_allocation(actor, allocation) {
-        const parent = actor.get_parent();
-        if (!parent)
-            return;
-
         const [, natural] = actor.get_preferred_width(-1);
-        const target = Math.min(natural, parent.get_width());
+        const target = Math.min(natural, actor.get_parent().get_width());
 
         if (allocation.get_width() >= target)
             return;
@@ -30,37 +26,58 @@ class GrowRightConstraint extends Clutter.Constraint {
     }
 });
 
-export default class WideRightPanel extends Extension {
+export default class WideRightTopBarPanel extends Extension {
     enable() {
-        // Move the clock out of the center box so the widened right box
-        // does not overlap it.
-        const container = Main.panel.statusArea.dateMenu?.container;
-        if (container) {
-            container.get_parent()?.remove_child(container);
-            Main.panel._leftBox.add_child(container);
-            this._clockMoved = true;
-        }
+        this._clockMoved = false;
+
+        this._settings = this.getSettings();
+        this._settingsChangedId = this._settings.connect('changed::move-clock', () => this._syncClock());
 
         this._constraint = new GrowRightConstraint();
         Main.panel._rightBox.add_constraint(this._constraint);
+
+        this._syncClock();
         Main.panel.queue_relayout();
     }
 
     disable() {
-        if (this._constraint) {
-            Main.panel._rightBox.remove_constraint(this._constraint);
-            this._constraint = null;
-        }
+        this._settings.disconnect(this._settingsChangedId);
+        this._settingsChangedId = null;
+        this._settings = null;
 
-        if (this._clockMoved) {
-            const container = Main.panel.statusArea.dateMenu?.container;
-            if (container) {
-                container.get_parent()?.remove_child(container);
-                Main.panel._centerBox.add_child(container);
-            }
-            this._clockMoved = false;
-        }
+        Main.panel._rightBox.remove_constraint(this._constraint);
+        this._constraint = null;
 
+        this._restoreClock();
+        Main.panel.queue_relayout();
+    }
+
+    _syncClock() {
+        if (this._settings.get_boolean('move-clock'))
+            this._moveClock();
+        else
+            this._restoreClock();
+    }
+
+    _moveClock() {
+        if (this._clockMoved)
+            return;
+
+        const container = Main.panel.statusArea.dateMenu.container;
+        container.get_parent().remove_child(container);
+        Main.panel._leftBox.add_child(container);
+        this._clockMoved = true;
+        Main.panel.queue_relayout();
+    }
+
+    _restoreClock() {
+        if (!this._clockMoved)
+            return;
+
+        const container = Main.panel.statusArea.dateMenu.container;
+        container.get_parent().remove_child(container);
+        Main.panel._centerBox.add_child(container);
+        this._clockMoved = false;
         Main.panel.queue_relayout();
     }
 }

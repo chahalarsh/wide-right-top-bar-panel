@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.wide-right-top-bar-panel"
+          path="/org/gnome/shell/extensions/wide-right-top-bar-panel/">
+    <key name="move-clock" type="b">
+      <default>true</default>
+      <summary>Move the clock to the left side</summary>
+      <description>Move the clock from the center to the left side of the top bar so the widened right side does not overlap it.</description>
+    </key>
+  </schema>
+</schemalist>

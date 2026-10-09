@@ -1,8 +1,9 @@
 {
-  "uuid": "wide-right-top-bar-panell@chahalarsh.github.io",
+  "uuid": "wide-right-top-bar-panel@chahalarsh.github.io",
   "name": "Wide right top bar Panel",
-  "description": "Lets the right side of the top bar grow beyond half the screen so crowded indicators and tray icons are no longer squished.",
-  "shell-version": ["48", "49","50"],
+  "description": "Lets the right side of the top bar grow beyond half the screen so crowded indicators and tray icons are no longer squished.\n\nOptionally (enabled by default, configurable in the extension settings) the clock is moved from the center to the left side of the panel so the widened right side does not overlap it.",
+  "shell-version": ["48", "49", "50"],
   "url": "https://github.com/chahalarsh/wide-right-top-bar-panel",
-  "version-name": "1.0.0"
+  "settings-schema": "org.gnome.shell.extensions.wide-right-top-bar-panel",
+  "version-name": "1.0.1"
 }
